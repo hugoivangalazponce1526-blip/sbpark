@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sobre Ruedas Park</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#111;color:#eee;padding:12px;font-size:14px}
+h1{font-size:1.3rem;color:#f0c040;margin-bottom:4px}
+.sub{font-size:0.72rem;color:#777;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.status{font-size:0.68rem;padding:2px 8px;border-radius:20px;font-weight:600}
+.status.online{background:rgba(78,202,127,0.15);color:#4eca7f}
+.status.offline{background:rgba(224,90,43,0.15);color:#e05a2b}
+.status.loading{background:rgba(240,192,64,0.15);color:#f0c040}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.card{background:#1e1e1e;border:1px solid #333;border-radius:10px;padding:14px;border-left:3px solid #f0c040}
+.card.g{border-left-color:#4eca7f}.card.b{border-left-color:#88aaff}
+.card label{font-size:0.65rem;text-transform:uppercase;color:#666;display:block;margin-bottom:4px;letter-spacing:1px}
+.card .val{font-size:1.4rem;font-weight:700;color:#f0c040}
+.card.g .val{color:#4eca7f}.card.b .val{color:#88aaff}
+.card .s{font-size:0.7rem;color:#555;margin-top:3px}
+.form-box{background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:14px}
+.form-box h2{font-size:0.9rem;color:#f0c040;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.form-tabs{display:flex;gap:8px;margin-bottom:14px}
+.ftab{background:#252525;border:1px solid #333;border-radius:6px;padding:6px 16px;color:#666;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.ftab.on{background:#f0c040;color:#111;border-color:#f0c040;font-weight:600}
+.ftab.red.on{background:#e05a2b;border-color:#e05a2b;color:#fff}
+.frow{display:none}.frow.on{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:4px;flex:1;min-width:90px}
+.f label{font-size:0.65rem;color:#666;text-transform:uppercase;letter-spacing:0.8px}
+.f input,.f select{background:#252525;border:1px solid #444;border-radius:6px;padding:8px;color:#eee;font-size:0.85rem;outline:none;width:100%}
+.f input:focus,.f select:focus{border-color:#f0c040}
+.btn{background:#f0c040;color:#111;border:none;border-radius:6px;padding:9px 20px;font-weight:700;cursor:pointer;font-size:0.85rem;white-space:nowrap}
+.btn:hover{opacity:0.85}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn.red{background:#e05a2b;color:#fff}
+.filters{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.fb{background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:5px 12px;color:#666;font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.fb.on,.fb:hover{border-color:#f0c040;color:#f0c040}
+.toggle{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:0.75rem;color:#666;cursor:pointer}
+.toggle input{cursor:pointer;accent-color:#f0c040}
+.tbl-wrap{background:#1a1a1a;border:1px solid #333;border-radius:10px;overflow:auto;max-height:420px}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead{position:sticky;top:0;background:#252525}
+th{padding:9px 12px;text-align:left;font-size:0.65rem;text-transform:uppercase;color:#555;letter-spacing:1px}
+td{padding:9px 12px;border-bottom:1px solid #222;font-size:0.82rem}
+tr:hover td{background:#1f1f1f}
+tr.nowork td{color:#333;font-style:italic}
+.g{color:#4eca7f;font-weight:600}.y{color:#f0c040;font-weight:600}.m{color:#555}
+.delbtn{background:none;border:1px solid #333;border-radius:4px;color:#555;padding:2px 8px;cursor:pointer;font-size:0.72rem}
+.delbtn:hover{border-color:#e05a2b;color:#e05a2b}
+.empty{text-align:center;padding:40px;color:#444}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:7px 18px;color:#666;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.82rem}
+.tab.on{background:#f0c040;color:#111;border-color:#f0c040;font-weight:600}
+.panel{display:none}.panel.on{display:block}
+.scard{background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:16px;margin-bottom:12px}
+.scard h3{font-size:0.82rem;color:#f0c040;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.sr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #222;font-size:0.82rem}
+.sr:last-child{border:none}.sr .lbl{color:#666}.sr .vv{font-weight:600}
+.bar-bg{background:#252525;border-radius:99px;height:12px;margin:8px 0 4px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#4eca7f,#f0c040);border-radius:99px}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #333;border-top-color:#f0c040;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn.print{background:#4eca7f;color:#111}
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:24px;width:320px;max-width:95vw}
+.modal h3{font-size:1rem;color:#f0c040;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+.modal select{width:100%;background:#252525;border:1px solid #444;border-radius:6px;padding:10px;color:#eee;font-size:0.9rem;outline:none;margin-bottom:16px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.btn.gray{background:#333;color:#aaa}
+/* Estilos de impresión */
+@media print{
+  body{background:#fff !important;color:#000 !important;padding:0;font-size:12px}
+  .no-print{display:none !important}
+  .print-area{display:block !important}
+  .print-header{margin-bottom:16px;border-bottom:2px solid #000;padding-bottom:10px}
+  .print-header h2{font-size:1.2rem;font-weight:700}
+  .print-header p{font-size:0.8rem;color:#444;margin-top:4px}
+  .print-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .print-card{border:1px solid #ccc;border-radius:6px;padding:10px}
+  .print-card label{font-size:0.65rem;text-transform:uppercase;color:#666;display:block;margin-bottom:4px}
+  .print-card .val{font-size:1.1rem;font-weight:700}
+  .print-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  .print-table th{background:#f0f0f0;padding:7px 8px;text-align:left;font-size:0.68rem;text-transform:uppercase;border:1px solid #ccc}
+  .print-table td{padding:6px 8px;border:1px solid #ddd;font-size:0.8rem}
+  .print-table tr.nowork td{color:#aaa;font-style:italic}
+  .print-medios{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .print-medio{border:1px solid #ccc;border-radius:6px;padding:8px;text-align:center}
+  .print-medio label{font-size:0.65rem;text-transform:uppercase;color:#666;display:block}
+  .print-medio .val{font-size:1rem;font-weight:700}
+}
+.print-area{display:none}
+@media(max-width:600px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .frow.on{flex-direction:column}
+  .f{min-width:100%}
+}
+</style>
+</head>
+<body>
+
+<h1>🚗 Sobre Ruedas Park</h1>
+<div class="sub">
+  Registro desde 12/12/2025
+  <span class="status loading" id="statusBadge"><span class="spinner"></span>Conectando...</span>
+</div>
+
+<div class="tabs">
+  <div class="tab on" onclick="showTab('reg',this)">📋 Registro</div>
+  <div class="tab" onclick="showTab('res',this)">📊 Resumen</div>
+  <button class="btn print no-print" onclick="abrirModal()" style="margin-left:auto;padding:7px 16px;font-size:0.82rem">🖨️ Imprimir mes</button>
+</div>
+
+<!-- Modal selección mes -->
+<div class="modal-bg no-print" id="modalBg">
+  <div class="modal">
+    <h3>🖨️ Imprimir Mes</h3>
+    <select id="selMes">
+      <option value="2025-12">Diciembre 2025</option>
+      <option value="2026-01">Enero 2026</option>
+      <option value="2026-02">Febrero 2026</option>
+      <option value="2026-03" selected>Marzo 2026</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn gray" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn print" onclick="imprimir()">Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<div id="reg" class="panel on">
+  <div class="cards">
+    <div class="card g"><label>Neto Total</label><div class="val" id="cNT">—</div><div class="s" id="cDT">—</div></div>
+    <div class="card"><label>Ventas Total</label><div class="val" id="cVT">—</div><div class="s" id="cPT">—</div></div>
+    <div class="card b"><label>Neto Marzo</label><div class="val" id="cNM">—</div><div class="s" id="cDM">—</div></div>
+    <div class="card"><label>Ventas Marzo</label><div class="val" id="cVM">—</div><div class="s" id="cPM">—</div></div>
+  </div>
+
+  <div class="form-box">
+    <h2>+ Agregar día</h2>
+    <div class="form-tabs">
+      <button class="ftab on" onclick="switchForm('work',this)">💰 Día trabajado</button>
+      <button class="ftab red" onclick="switchForm('nowork',this)">🚫 No se trabajó</button>
+    </div>
+    <div id="fwork" class="frow on">
+      <div class="f"><label>Fecha</label><input type="date" id="iF"></div>
+      <div class="f"><label>Horario</label><input type="text" id="iH" placeholder="19:30-23:00"></div>
+      <div class="f"><label>Total $</label><input type="number" id="iT" placeholder="0"></div>
+      <div class="f"><label>Efectivo</label><input type="number" id="iE" placeholder="0"></div>
+      <div class="f"><label>Transfer.</label><input type="number" id="iTr" placeholder="0"></div>
+      <div class="f"><label>Tarjeta</label><input type="number" id="iTa" placeholder="0"></div>
+      <div class="f"><label>Pago ayud.</label><input type="number" id="iP" placeholder="0"></div>
+      <button class="btn" id="btnAgregar" onclick="agregar()">Agregar</button>
+    </div>
+    <div id="fnowork" class="frow">
+      <div class="f" style="max-width:180px"><label>Fecha</label><input type="date" id="iNF"></div>
+      <button class="btn red" id="btnNoWork" onclick="agregarNoWork()">Agregar</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="fb on" onclick="fil('todos',this)">Todos</button>
+    <button class="fb" onclick="fil('2025-12',this)">Dic 25</button>
+    <button class="fb" onclick="fil('2026-01',this)">Ene 26</button>
+    <button class="fb" onclick="fil('2026-02',this)">Feb 26</button>
+    <button class="fb" onclick="fil('2026-03',this)">Mar 26</button>
+    <label class="toggle"><input type="checkbox" id="chkNoWork" checked onchange="renderTabla()"> Sin trabajo</label>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Fecha</th><th>Horario</th><th>Total</th><th>Efectivo</th><th>Transfer.</th><th>Tarjeta</th><th>Pago</th><th>Neto</th><th></th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div class="empty" id="emp">
+      <span class="spinner"></span> Cargando datos...
+    </div>
+  </div>
+</div>
+
+<div id="res" class="panel">
+  <div id="resContent"><div class="empty"><span class="spinner"></span> Cargando...</div></div>
+</div>
+
+<!-- Área de impresión (invisible en pantalla, visible al imprimir) -->
+<div class="print-area" id="printArea"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDRKx2q2dEGg_sQ5Hy5nd5d-2x1IynJicY",
+  authDomain: "sobre-ruedas-park.firebaseapp.com",
+  projectId: "sobre-ruedas-park",
+  storageBucket: "sobre-ruedas-park.firebasestorage.app",
+  messagingSenderId: "312420306967",
+  appId: "1:312420306967:web:7b44f622784d167b568c52"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ─── DATOS HISTÓRICOS (fijos, no se borran) ───────────────────────────────
+const HISTORICO = [
+  {id:'h1',f:'2025-12-12',h:'18:30-22:00',t:150000,e:126000,tr:12000,ta:12000,p:25000,o:0},
+  {id:'h2',f:'2025-12-13',h:'20:00-22:30',t:116000,e:88000,tr:28000,ta:0,p:20000,o:0},
+  {id:'h3',f:'2025-12-14',h:'19:20-23:00',t:219000,e:167000,tr:36000,ta:16000,p:25000,o:0},
+  {id:'h4',f:'2025-12-15',h:'19:00-22:30',t:147000,e:127000,tr:20000,ta:0,p:30000,o:0},
+  {id:'h5',f:'2025-12-16',h:'19:30-22:30',t:176000,e:156000,tr:20000,ta:0,p:25000,o:0},
+  {id:'h6',f:'2025-12-17',h:'19:30-23:30',t:213000,e:201000,tr:12000,ta:0,p:30000,o:0},
+  {id:'h7',f:'2025-12-19',h:'19:30-22:30',t:192000,e:180000,tr:12000,ta:0,p:25000,o:0},
+  {id:'h8',f:'2025-12-20',h:'19:30-24:00',t:216000,e:196000,tr:20000,ta:0,p:30000,o:50000},
+  {id:'h9',f:'2025-12-21',h:'19:30-23:40',t:172000,e:144000,tr:28000,ta:0,p:28000,o:0},
+  {id:'h10',f:'2025-12-22',h:'19:39-23:30',t:136000,e:120000,tr:16000,ta:0,p:25000,o:0},
+  {id:'h11',f:'2025-12-23',h:'20:00-23:00',t:156000,e:144000,tr:12000,ta:0,p:25000,o:0},
+  {id:'h12',f:'2025-12-26',h:'20:40-23:40',t:87000,e:61000,tr:26000,ta:0,p:20000,o:0},
+  {id:'h13',f:'2025-12-27',h:'19:30-23:30',t:110000,e:83000,tr:19000,ta:8000,p:20000,o:0},
+  {id:'h14',f:'2025-12-28',h:'19:30-23:30',t:115000,e:82000,tr:17000,ta:16000,p:25000,o:2000},
+  {id:'h15',f:'2025-12-29',h:'19:30-23:30',t:65000,e:49000,tr:12000,ta:4000,p:20000,o:0},
+  {id:'h16',f:'2025-12-30',h:'19:30-23:30',t:80000,e:59000,tr:16000,ta:5000,p:20000,o:0},
+  {id:'h17',f:'2026-01-02',h:'19:30-23:00',t:71000,e:68000,tr:3000,ta:0,p:20000,o:0},
+  {id:'h18',f:'2026-01-03',h:'19:30-23:30',t:120000,e:88000,tr:24000,ta:8000,p:25000,o:0},
+  {id:'h19',f:'2026-01-04',h:'19:30-23:00',t:39000,e:27000,tr:4000,ta:8000,p:20000,o:0},
+  {id:'h20',f:'2026-01-05',h:'19:30-23:30',t:71000,e:59000,tr:8000,ta:4000,p:20000,o:10000},
+  {id:'h21',f:'2026-01-06',h:'19:30-23:00',t:82000,e:69000,tr:12000,ta:1000,p:20000,o:0},
+  {id:'h22',f:'2026-01-07',h:'19:30-23:30',t:157000,e:117000,tr:16000,ta:24000,p:20000,o:0},
+  {id:'h23',f:'2026-01-08',h:'19:30-23:30',t:115000,e:95000,tr:20000,ta:0,p:20000,o:0},
+  {id:'h24',f:'2026-01-09',h:'19:30-23:30',t:171000,e:119000,tr:12000,ta:40000,p:25000,o:0},
+  {id:'h25',f:'2026-01-10',h:'19:30-23:30',t:181000,e:165000,tr:8000,ta:8000,p:20000,o:0},
+  {id:'h26',f:'2026-01-11',h:'19:30-23:30',t:184000,e:121000,tr:19000,ta:44000,p:20000,o:0},
+  {id:'h27',f:'2026-01-12',h:'19:30-23:30',t:135000,e:115000,tr:8000,ta:12000,p:25000,o:0},
+  {id:'h28',f:'2026-01-13',h:'19:30-23:30',t:134000,e:114000,tr:12000,ta:8000,p:25000,o:0},
+  {id:'h29',f:'2026-01-14',h:'19:30-23:30',t:159000,e:111000,tr:36000,ta:12000,p:25000,o:0},
+  {id:'h30',f:'2026-01-15',h:'19:30-23:30',t:192000,e:138000,tr:27000,ta:27000,p:25000,o:0},
+  {id:'h31',f:'2026-01-16',h:'19:30-23:30',t:161000,e:130000,tr:27000,ta:4000,p:25000,o:0},
+  {id:'h32',f:'2026-01-17',h:'19:30-23:30',t:177000,e:165000,tr:0,ta:12000,p:25000,o:0},
+  {id:'h33',f:'2026-01-18',h:'19:30-23:30',t:214000,e:162000,tr:16000,ta:36000,p:25000,o:0},
+  {id:'h34',f:'2026-01-19',h:'19:30-23:30',t:110000,e:92000,tr:9000,ta:9000,p:0,o:110000},
+  {id:'h35',f:'2026-01-20',h:'19:30-23:30',t:152000,e:116000,tr:16000,ta:20000,p:25000,o:5000},
+  {id:'h36',f:'2026-01-21',h:'20:00-23:30',t:92000,e:72000,tr:8000,ta:12000,p:20000,o:0},
+  {id:'h37',f:'2026-01-22',h:'20:00-23:30',t:154000,e:98000,tr:44000,ta:12000,p:0,o:0},
+  {id:'h38',f:'2026-01-23',h:'19:30-23:30',t:186000,e:124000,tr:38000,ta:24000,p:25000,o:0},
+  {id:'h39',f:'2026-01-24',h:'—',t:159000,e:115000,tr:28000,ta:16000,p:25000,o:0},
+  {id:'h40',f:'2026-01-25',h:'—',t:44000,e:32000,tr:4000,ta:8000,p:20000,o:0},
+  {id:'h41',f:'2026-01-26',h:'—',t:120000,e:100000,tr:20000,ta:0,p:25000,o:0},
+  {id:'h42',f:'2026-01-27',h:'—',t:95000,e:67000,tr:16000,ta:12000,p:20000,o:0},
+  {id:'h43',f:'2026-01-28',h:'20:00-23:30',t:111000,e:87000,tr:16000,ta:8000,p:25000,o:0},
+  {id:'h44',f:'2026-01-29',h:'19:30-23:30',t:99000,e:67000,tr:16000,ta:16000,p:25000,o:0},
+  {id:'h45',f:'2026-01-30',h:'19:30-23:30',t:120000,e:92000,tr:8000,ta:20000,p:25000,o:0},
+  {id:'h45b',f:'2026-01-30',h:'GASTO EXTRA',t:0,e:0,tr:0,ta:0,p:0,o:70000},
+  {id:'h46',f:'2026-01-31',h:'20:00-23:30',t:192000,e:128000,tr:16000,ta:48000,p:25000,o:0},
+  {id:'h47',f:'2026-02-01',h:'20:00-23:30',t:109000,e:97000,tr:4000,ta:8000,p:25000,o:0},
+  {id:'h48',f:'2026-02-02',h:'20:00-23:30',t:118000,e:98000,tr:20000,ta:0,p:25000,o:0},
+  {id:'h49',f:'2026-02-03',h:'19:30-23:00',t:116000,e:72000,tr:20000,ta:24000,p:25000,o:0},
+  {id:'h50',f:'2026-02-04',h:'19:30-23:00',t:68000,e:60000,tr:0,ta:8000,p:20000,o:0},
+  {id:'h51',f:'2026-02-05',h:'—',t:130000,e:87000,tr:23000,ta:20000,p:23000,o:0},
+  {id:'h52',f:'2026-02-06',h:'—',t:124000,e:84000,tr:4000,ta:36000,p:25000,o:0},
+  {id:'h53',f:'2026-02-07',h:'19:00-23:30',t:164000,e:140000,tr:4000,ta:20000,p:25000,o:0},
+  {id:'h54',f:'2026-02-08',h:'19:30-23:30',t:175000,e:135000,tr:20000,ta:20000,p:25000,o:0},
+  {id:'h55',f:'2026-02-09',h:'20:30-23:30',t:105000,e:75000,tr:20000,ta:10000,p:20000,o:0},
+  {id:'h56',f:'2026-02-10',h:'—',t:62000,e:46000,tr:12000,ta:4000,p:20000,o:0},
+  {id:'h57',f:'2026-02-11',h:'—',t:95000,e:61000,tr:16000,ta:18000,p:20000,o:0},
+  {id:'h58',f:'2026-02-12',h:'—',t:260000,e:204000,tr:16000,ta:40000,p:30000,o:0},
+  {id:'h59',f:'2026-02-13',h:'—',t:115000,e:79000,tr:4000,ta:32000,p:30000,o:0},
+  {id:'h60',f:'2026-02-14',h:'19:30-24:00',t:233000,e:185000,tr:16000,ta:32000,p:30000,o:0},
+  {id:'h61',f:'2026-02-15',h:'19:30-23:30',t:70000,e:48000,tr:4000,ta:18000,p:20000,o:0},
+  {id:'h62',f:'2026-02-16',h:'19:30-23:30',t:86000,e:74000,tr:4000,ta:8000,p:25000,o:0},
+  {id:'h63',f:'2026-02-17',h:'19:30-23:30',t:77000,e:54000,tr:15000,ta:8000,p:25000,o:0},
+  {id:'h64',f:'2026-02-18',h:'19:30-23:30',t:69000,e:41000,tr:16000,ta:12000,p:25000,o:0},
+  {id:'h65',f:'2026-02-19',h:'19:30-23:39',t:91000,e:76000,tr:8000,ta:7000,p:25000,o:0},
+  {id:'h66',f:'2026-02-20',h:'19:30-23:30',t:123000,e:67000,tr:28000,ta:28000,p:25000,o:0},
+  {id:'h67',f:'2026-02-21',h:'19:30-23:30',t:240000,e:184000,tr:24000,ta:32000,p:30000,o:0},
+  {id:'h68',f:'2026-02-22',h:'19:30-23:30',t:116000,e:108000,tr:0,ta:8000,p:25000,o:0},
+  {id:'h69',f:'2026-02-23',h:'19:30-23:00',t:111000,e:79000,tr:4000,ta:28000,p:25000,o:0},
+  {id:'h70',f:'2026-02-24',h:'19:30-23:30',t:154000,e:122000,tr:4000,ta:28000,p:25000,o:0},
+  {id:'h71',f:'2026-02-25',h:'19:30-22:30',t:63000,e:55000,tr:0,ta:8000,p:25000,o:0},
+  {id:'h72',f:'2026-02-26',h:'19:30-23:30',t:99000,e:79000,tr:8000,ta:12000,p:25000,o:0},
+  {id:'h73',f:'2026-02-27',h:'19:30-23:30',t:148000,e:108000,tr:12000,ta:28000,p:25000,o:0},
+  {id:'h74',f:'2026-02-28',h:'19:30-23:30',t:181000,e:125000,tr:36000,ta:20000,p:25000,o:0},
+  {id:'h75',f:'2026-03-01',h:'19:30-23:00',t:154000,e:128000,tr:14000,ta:12000,p:25000,o:0},
+  {id:'h76',f:'2026-03-03',h:'18:00-22:00',t:129000,e:78000,tr:16000,ta:35000,p:25000,o:0},
+  {id:'h77',f:'2026-03-04',h:'19:00-22:00',t:88000,e:76000,tr:8000,ta:4000,p:25000,o:0},
+  {id:'h78',f:'2026-03-05',h:'19:00-22:00',t:76000,e:52000,tr:4000,ta:20000,p:24000,o:0},
+  {id:'h79',f:'2026-03-06',h:'19:30-22:30',t:162000,e:116000,tr:4000,ta:42000,p:25000,o:0},
+  {id:'h80',f:'2026-03-07',h:'19:30-22:30',t:143000,e:89000,tr:22000,ta:32000,p:25000,o:0},
+  {id:'h81',f:'2026-03-08',h:'19:00-22:00',t:84000,e:66000,tr:14000,ta:4000,p:25000,o:0},
+  {id:'h82',f:'2026-03-09',h:'19:30-22:00',t:52000,e:36000,tr:4000,ta:12000,p:25000,o:0},
+  {id:'h83',f:'2026-03-13',h:'19:30-22:30',t:148000,e:124000,tr:12000,ta:12000,p:25000,o:0},
+  {id:'h84',f:'2026-03-14',h:'19:00-22:30',t:228000,e:208000,tr:12000,ta:8000,p:28000,o:0},
+];
+
+const NO_WORK_BASE = [
+  {id:'nw1',f:'2025-12-18',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw2',f:'2025-12-24',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw3',f:'2025-12-25',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw4',f:'2025-12-31',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw5',f:'2026-01-01',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw6',f:'2026-03-02',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw7',f:'2026-03-10',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw8',f:'2026-03-11',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw9',f:'2026-03-12',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw10',f:'2026-03-15',h:'NO SE TRABAJÓ',nowork:true},
+  {id:'nw11',f:'2026-03-16',h:'NO SE TRABAJÓ',nowork:true},
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+let extrasWork = [];
+let extrasNoWork = [];
+let activeFil = 'todos';
+let dbReady = false;
+
+// ─── UTILS ────────────────────────────────────────────────────────────────
+const neto = r => (r.t||0) - (r.p||0) - (r.o||0);
+const fmt = n => '$' + Number(n).toLocaleString('es-CL');
+const fd = f => { const[y,m,d]=f.split('-'); return d+'/'+m+'/'+y; };
+
+const allWork = () => [...HISTORICO, ...extrasWork].sort((a,b) => a.f.localeCompare(b.f)||a.id.localeCompare(b.id));
+const allNW = () => [...NO_WORK_BASE, ...extrasNoWork];
+const allRows = () => [...allWork(), ...allNW().map(r=>({...r,t:0,e:0,tr:0,ta:0,p:0,o:0}))].sort((a,b)=>a.f.localeCompare(b.f)||a.id.localeCompare(b.id));
+
+// ─── FIREBASE LISTENERS ───────────────────────────────────────────────────
+function setStatus(type, msg) {
+  const el = document.getElementById('statusBadge');
+  el.className = 'status ' + type;
+  el.innerHTML = type === 'loading' ? `<span class="spinner"></span>${msg}` : msg;
+}
+
+// Listen dias trabajados extras
+onSnapshot(query(collection(db, 'dias'), orderBy('f')), snap => {
+  extrasWork = snap.docs.map(d => ({...d.data(), docId: d.id}));
+  dbReady = true;
+  setStatus('online', '🟢 Sincronizado');
+  render();
+}, err => {
+  setStatus('offline', '🔴 Sin conexión');
+  console.error(err);
+});
+
+// Listen dias no trabajados extras
+onSnapshot(query(collection(db, 'nowork'), orderBy('f')), snap => {
+  extrasNoWork = snap.docs.map(d => ({...d.data(), docId: d.id, nowork: true}));
+  render();
+});
+
+// ─── RENDER ───────────────────────────────────────────────────────────────
+function calcCards() {
+  const data = allWork();
+  const mar = data.filter(r => r.f.startsWith('2026-03'));
+  const nt = data.reduce((a,r) => a+neto(r), 0);
+  const vt = data.reduce((a,r) => a+(r.t||0), 0);
+  const dias = data.filter(r => (r.t||0) > 0).length;
+  const nm = mar.reduce((a,r) => a+neto(r), 0);
+  const vm = mar.reduce((a,r) => a+(r.t||0), 0);
+  const dm = mar.filter(r => (r.t||0) > 0).length;
+  document.getElementById('cNT').textContent = fmt(nt);
+  document.getElementById('cDT').textContent = dias + ' días trabajados';
+  document.getElementById('cVT').textContent = fmt(vt);
+  document.getElementById('cPT').textContent = 'Prom neto: ' + fmt(dias ? Math.round(nt/dias) : 0) + '/día';
+  document.getElementById('cNM').textContent = fmt(nm);
+  document.getElementById('cDM').textContent = dm + ' días trabajados';
+  document.getElementById('cVM').textContent = fmt(vm);
+  document.getElementById('cPM').textContent = 'Prom neto: ' + fmt(dm ? Math.round(nm/dm) : 0) + '/día';
+}
+
+function renderTabla() {
+  const showNW = document.getElementById('chkNoWork').checked;
+  let data = allRows();
+  if (!showNW) data = data.filter(r => !r.nowork);
+  if (activeFil !== 'todos') data = data.filter(r => r.f.startsWith(activeFil));
+  data = [...data].reverse();
+
+  const tb = document.getElementById('tb');
+  const emp = document.getElementById('emp');
+
+  if (!data.length) { tb.innerHTML = ''; emp.style.display = 'block'; emp.textContent = 'Sin registros'; return; }
+  emp.style.display = 'none';
+
+  tb.innerHTML = data.map(r => {
+    if (r.nowork) {
+      const isDel = extrasNoWork.find(e => e.id === r.id);
+      return `<tr class="nowork">
+        <td>${fd(r.f)}</td>
+        <td colspan="7" style="color:#2a2a2a">${r.h}</td>
+        <td>${isDel ? `<button class="delbtn" onclick="window._delNW('${isDel.docId}')">✕</button>` : ''}</td>
+      </tr>`;
+    }
+    const n = neto(r);
+    const isExtra = extrasWork.find(e => e.id === r.id);
+    return `<tr>
+      <td>${fd(r.f)}</td>
+      <td class="m">${r.h||'—'}</td>
+      <td class="y">${r.t ? fmt(r.t) : '<span class="m">—</span>'}</td>
+      <td class="m">${r.e ? fmt(r.e) : '—'}</td>
+      <td class="m">${r.tr ? fmt(r.tr) : '—'}</td>
+      <td class="m">${r.ta ? fmt(r.ta) : '—'}</td>
+      <td style="color:#c0553a">${r.p ? fmt(r.p) : '—'}</td>
+      <td class="${n >= 0 ? 'g' : ''}" style="${n < 0 ? 'color:#e05a2b' : ''}">${fmt(n)}</td>
+      <td>${isExtra ? `<button class="delbtn" onclick="window._del('${isExtra.docId}')">✕</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function render() { calcCards(); renderTabla(); }
+
+// ─── ACCIONES ────────────────────────────────────────────────────────────
+window.switchForm = (type, el) => {
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('fwork').classList.toggle('on', type === 'work');
+  document.getElementById('fnowork').classList.toggle('on', type === 'nowork');
+};
+
+window.fil = (v, el) => {
+  activeFil = v;
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  renderTabla();
+};
+
+window.agregar = async () => {
+  const f = document.getElementById('iF').value;
+  const t = parseFloat(document.getElementById('iT').value) || 0;
+  if (!f || t <= 0) { alert('Ingresa fecha y total.'); return; }
+  const btn = document.getElementById('btnAgregar');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    await addDoc(collection(db, 'dias'), {
+      id: 'u' + Date.now(),
+      f, h: document.getElementById('iH').value || '—',
+      t, e: parseFloat(document.getElementById('iE').value)||0,
+      tr: parseFloat(document.getElementById('iTr').value)||0,
+      ta: parseFloat(document.getElementById('iTa').value)||0,
+      p: parseFloat(document.getElementById('iP').value)||0, o: 0
+    });
+    ['iT','iE','iTr','iTa','iP','iH'].forEach(id => document.getElementById(id).value = '');
+  } catch(e) { alert('Error al guardar. Revisa tu conexión.'); }
+  btn.disabled = false; btn.textContent = 'Agregar';
+};
+
+window.agregarNoWork = async () => {
+  const f = document.getElementById('iNF').value;
+  if (!f) { alert('Selecciona una fecha.'); return; }
+  const btn = document.getElementById('btnNoWork');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    await addDoc(collection(db, 'nowork'), {
+      id: 'nwu' + Date.now(), f, h: 'NO SE TRABAJÓ'
+    });
+    document.getElementById('iNF').value = '';
+  } catch(e) { alert('Error al guardar.'); }
+  btn.disabled = false; btn.textContent = 'Agregar';
+};
+
+window._del = async (docId) => {
+  if (!confirm('¿Eliminar este registro?')) return;
+  await deleteDoc(doc(db, 'dias', docId));
+};
+
+window._delNW = async (docId) => {
+  if (!confirm('¿Eliminar este día?')) return;
+  await deleteDoc(doc(db, 'nowork', docId));
+};
+
+window.showTab = (id, el) => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById(id).classList.add('on');
+  if (id === 'res') renderRes();
+};
+
+function renderRes() {
+  const data = allWork();
+  const work = data.filter(r => (r.t||0) > 0);
+  const nt = data.reduce((a,r) => a+neto(r), 0);
+  const vt = data.reduce((a,r) => a+(r.t||0), 0);
+  const ef = data.reduce((a,r) => a+(r.e||0), 0);
+  const tr = data.reduce((a,r) => a+(r.tr||0), 0);
+  const ta = data.reduce((a,r) => a+(r.ta||0), 0);
+  const pt = data.reduce((a,r) => a+(r.p||0), 0);
+  const inv = 6780000;
+  const pct = Math.round(nt/inv*100);
+  const meses = [['2025-12','Diciembre 2025'],['2026-01','Enero 2026'],['2026-02','Febrero 2026'],['2026-03','Marzo 2026']];
+  document.getElementById('resContent').innerHTML = `
+    <div class="scard">
+      <h3>📈 General</h3>
+      <div class="sr"><span class="lbl">Días trabajados</span><span class="vv" style="color:#f0c040">${work.length}</span></div>
+      <div class="sr"><span class="lbl">Ventas brutas</span><span class="vv" style="color:#f0c040">${fmt(vt)}</span></div>
+      <div class="sr"><span class="lbl">Total pago ayudante</span><span class="vv" style="color:#e05a2b">-${fmt(pt)}</span></div>
+      <div class="sr"><span class="lbl">Neto total</span><span class="vv" style="color:#4eca7f">${fmt(nt)}</span></div>
+      <div class="sr"><span class="lbl">Promedio neto/día</span><span class="vv" style="color:#4eca7f">${fmt(work.length ? Math.round(nt/work.length) : 0)}</span></div>
+    </div>
+    <div class="scard">
+      <h3>💳 Medios de Pago</h3>
+      <div class="sr"><span class="lbl">Efectivo</span><span class="vv" style="color:#4eca7f">${fmt(ef)} <small style="color:#555">(${vt?Math.round(ef/vt*100):0}%)</small></span></div>
+      <div class="sr"><span class="lbl">Transferencia</span><span class="vv" style="color:#88aaff">${fmt(tr)} <small style="color:#555">(${vt?Math.round(tr/vt*100):0}%)</small></span></div>
+      <div class="sr"><span class="lbl">Tarjeta</span><span class="vv" style="color:#f0c040">${fmt(ta)} <small style="color:#555">(${vt?Math.round(ta/vt*100):0}%)</small></span></div>
+    </div>
+    <div class="scard">
+      <h3>📅 Por Mes</h3>
+      ${meses.map(([k,l]) => {
+        const md = data.filter(r => r.f.startsWith(k));
+        const mn = md.reduce((a,r) => a+neto(r), 0);
+        const mv = md.reduce((a,r) => a+(r.t||0), 0);
+        const dd = md.filter(r => (r.t||0) > 0).length;
+        return `<div class="sr"><span class="lbl">${l}</span><span class="vv" style="font-size:0.8rem"><span style="color:#4eca7f">${fmt(mn)}</span> <small style="color:#555">neto · ${fmt(mv)} ventas · ${dd}d</small></span></div>`;
+      }).join('')}
+    </div>
+    <div class="scard">
+      <h3>🎯 Recuperación Inversión ($6.780.000)</h3>
+      <div class="sr"><span class="lbl">Neto acumulado</span><span class="vv" style="color:#4eca7f">${fmt(nt)}</span></div>
+      <div class="sr"><span class="lbl">% recuperado</span><span class="vv" style="color:#4eca7f">${pct}%</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${Math.min(pct,100)}%"></div></div>
+      <div style="font-size:0.72rem;color:#555;margin-top:4px">${pct >= 100 ? '✅ Inversión recuperada' : 'Faltan ' + fmt(Math.max(inv-nt,0))}</div>
+    </div>
+  `;
+}
+
+// Init fecha
+document.getElementById('iF').value = new Date().toISOString().split('T')[0];
+document.getElementById('iNF').value = new Date().toISOString().split('T')[0];
+
+// ─── IMPRESIÓN ────────────────────────────────────────────────────────────
+const MESES_LABEL = {
+  '2025-12': 'Diciembre 2025',
+  '2026-01': 'Enero 2026',
+  '2026-02': 'Febrero 2026',
+  '2026-03': 'Marzo 2026',
+};
+
+window.abrirModal = () => {
+  document.getElementById('modalBg').classList.add('on');
+};
+
+window.cerrarModal = () => {
+  document.getElementById('modalBg').classList.remove('on');
+};
+
+window.imprimir = () => {
+  const mes = document.getElementById('selMes').value;
+  const label = MESES_LABEL[mes] || mes;
+
+  const workData = allWork().filter(r => r.f.startsWith(mes));
+  const nwData = allNW().filter(r => r.f.startsWith(mes));
+  const allMes = [...workData, ...nwData.map(r=>({...r,t:0,e:0,tr:0,ta:0,p:0,o:0}))].sort((a,b)=>a.f.localeCompare(b.f));
+
+  const nt = workData.reduce((a,r)=>a+neto(r),0);
+  const vt = workData.reduce((a,r)=>a+(r.t||0),0);
+  const dias = workData.filter(r=>(r.t||0)>0).length;
+  const ef = workData.reduce((a,r)=>a+(r.e||0),0);
+  const tr = workData.reduce((a,r)=>a+(r.tr||0),0);
+  const ta = workData.reduce((a,r)=>a+(r.ta||0),0);
+  const pt = workData.reduce((a,r)=>a+(r.p||0),0);
+
+  const filas = allMes.map(r => {
+    if (r.nowork) return `<tr class="nowork"><td>${fd(r.f)}</td><td colspan="7">${r.h||'NO SE TRABAJÓ'}</td></tr>`;
+    const n = neto(r);
+    return `<tr>
+      <td>${fd(r.f)}</td>
+      <td>${r.h||'—'}</td>
+      <td>${r.t?fmt(r.t):'—'}</td>
+      <td>${r.e?fmt(r.e):'—'}</td>
+      <td>${r.tr?fmt(r.tr):'—'}</td>
+      <td>${r.ta?fmt(r.ta):'—'}</td>
+      <td>${r.p?fmt(r.p):'—'}</td>
+      <td style="font-weight:700">${fmt(n)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="print-header">
+      <h2>🚗 Sobre Ruedas Park — ${label}</h2>
+      <p>Impreso el ${new Date().toLocaleDateString('es-CL', {weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+    </div>
+    <div class="print-summary">
+      <div class="print-card"><label>Días trabajados</label><div class="val">${dias}</div></div>
+      <div class="print-card"><label>Ventas del mes</label><div class="val">${fmt(vt)}</div></div>
+      <div class="print-card"><label>Neto del mes</label><div class="val">${fmt(nt)}</div></div>
+      <div class="print-card"><label>Pago ayudante</label><div class="val">-${fmt(pt)}</div></div>
+      <div class="print-card"><label>Promedio neto/día</label><div class="val">${fmt(dias?Math.round(nt/dias):0)}</div></div>
+    </div>
+    <table class="print-table">
+      <thead><tr>
+        <th>Fecha</th><th>Horario</th><th>Total</th><th>Efectivo</th><th>Transfer.</th><th>Tarjeta</th><th>Pago</th><th>Neto</th>
+      </tr></thead>
+      <tbody>${filas}</tbody>
+      <tfoot><tr style="font-weight:700;background:#f0f0f0">
+        <td colspan="2">TOTAL</td>
+        <td>${fmt(vt)}</td>
+        <td>${fmt(ef)}</td>
+        <td>${fmt(tr)}</td>
+        <td>${fmt(ta)}</td>
+        <td>${fmt(pt)}</td>
+        <td>${fmt(nt)}</td>
+      </tr></tfoot>
+    </table>
+    <div class="print-medios">
+      <div class="print-medio"><label>Efectivo</label><div class="val">${fmt(ef)}</div><small>${vt?Math.round(ef/vt*100):0}%</small></div>
+      <div class="print-medio"><label>Transferencia</label><div class="val">${fmt(tr)}</div><small>${vt?Math.round(tr/vt*100):0}%</small></div>
+      <div class="print-medio"><label>Tarjeta</label><div class="val">${fmt(ta)}</div><small>${vt?Math.round(ta/vt*100):0}%</small></div>
+    </div>
+  `;
+
+  cerrarModal();
+  setTimeout(() => window.print(), 200);
+};
+</script>
+</body>
+</html>
